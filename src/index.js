@@ -33,6 +33,39 @@ app.post('/tasks', ({body}, res) => {
 })
 
 
+app.get('/users', (req, res) => {
+    User.find({}).then((users)=>{
+        res.status(200).send(users)
+    }).catch((error)=>{
+        res.status(500).send(error)
+    })
+})
+
+app.get('/users/:id', (req, res) => {
+    User.findById(req.params.id).then((user=>{
+        if(!user) return res.status(404).send()
+        res.status(200).send(user)
+    })).catch((error)=>{
+        res.status(500).send(error)
+    })
+})
+
+app.get('/tasks', (req, res)=>{
+    Task.find().then((task)=>{
+        res.status(200).send(task)
+    }).catch((error)=>{
+        res.status(500).send(task)
+    })
+})
+
+app.get('/tasks/:id', (req, res)=>{
+    Task.findById(req.params.id).then((task)=>{
+        if(!task) return res.status(404).send()
+        res.status(200).send(task)
+    }).catch((error)=>{
+        res.status(500).send(error)
+    })
+})
 
 
 app.listen(port, () => {
