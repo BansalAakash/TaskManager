@@ -11,19 +11,23 @@ app.use(express.json())
 app.use(userRouter)
 app.use(taskRouter)
 
+console.clear()
+
 app.listen(port, () => {
     console.log('Listening on port', port)
 })
 
-const jwt = require('jsonwebtoken')
 
-const myFunction = async () => {
-    const token = jwt.sign({_id: 'dummyId'}, 'aSeriesOfCharacters', {expiresIn:'2 days'})
-    console.log(token)
+const Task = require('./models/task')
+const User = require('./models/user')
 
-    const data = jwt.verify(token, 'aSeriesOfCharacters')
-    console.log(data)
-    
+const main = async () => {
+    // const task = await Task.findById('628e06b3e2e34fae8868a5fe')
+    // await task.populate('createdBy')        
+    // console.log(task.createdBy)
+
+    const user = await User.findById('628e0445ef0deaf50381091c')
+    await user.populate('tasks')
+    console.log(user.tasks)
 }
-
-// myFunction()
+// main()

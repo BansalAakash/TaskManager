@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const Task = require('./task')
 
 const userSchema = new mongoose.Schema({
     name : {
@@ -47,6 +48,14 @@ const userSchema = new mongoose.Schema({
             required: true
         }
     }]
+}, {
+    timestamps: true
+})
+
+userSchema.virtual('tasks', {
+    ref: 'Task',                                   //This is a virtual property that links tasks created by a user to a user
+    localField: '_id',                              //Id of this user is mapped to 
+    foreignField: 'createdBy'                                                   //createdBy of task
 })
 
 userSchema.methods.generateAuthToken = async function() {                   //instance method
@@ -54,6 +63,13 @@ userSchema.methods.generateAuthToken = async function() {                   //in
     this.tokens = this.tokens.concat({token})
     await this.save()
     return token
+}
+
+userSchema.methods.toJSON = function() {                                //overriding the default toJSON method
+    const userObject = this.toObject()
+    delete userObject.password
+    delete userObject.tokens
+    return userObject
 }
 
 userSchema.statics.findByCredentials = async (email, password) => {         //static method
@@ -78,7 +94,13 @@ userSchema.pre('save', async function(next) {
     next()
 })
 
-
+//Delete all tasks created by user when user is deleted
+userSchema.pre('remove', async function(next){
+    await Task.deleteMany({
+        createdBy : this._id
+    })
+    next()
+})
 
 const User = mongoose.model('User', userSchema)
 
